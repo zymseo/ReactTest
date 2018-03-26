@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Component Life Period</title>
+</head>
+<body>
+	<div id="app"></div>
+
+	<!--
+    1、最后一个 <script> 标签的 type 属性为 text/babel 。这是因为 React 独有的 JSX 语法，跟 JavaScript 不兼容。凡是使用 JSX 的地方，都要加上 type="text/babel"。
+    
+    2、上面代码一共用了三个库： react.min.js 、react-dom.min.js 和 Browser.js ，它们必须首先加载。
+    （1）react.js 是 React 的核心库
+    （2）react-dom.js 是提供与 DOM 相关的功能
+    （3）Browser.js 的作用是将 JSX 语法转为 JavaScript 语法，这一步很消耗时间，实际上线的时候，应该将它放到服务器完成。
+  -->
+  <script src="../../static/js/react.min.js"></script>
+  <script src="../../static/js/react-dom.min.js"></script>
+  <script src="../../static/js/browser.js"></script>
+	<script type="text/javascript" src="../../static/js/zepto.min.js"></script>
+
+	<script type="text/babel">
+		/*
+			组件的生命周期分成三个状态：
+				Mounting：已插入真实 DOM
+				Updating：正在被重新渲染
+				Unmounting：已移出真实 DOM
+
+			React 为每个状态都提供了两种处理函数，will 函数在进入状态之前调用，did 函数在进入状态之后调用，三种状态共计五种处理函数。
+				componentWillMount()
+				componentDidMount()
+				componentWillUpdate(object nextProps, object nextState)
+				componentDidUpdate(object prevProps, object prevState)
+				componentWillUnmount()
+			
+			此外，React 还提供两种特殊状态的处理函数:
+				componentWillReceiveProps(object nextProps)：
+					已加载组件收到新的参数时调用。
+					主要使用的场景，来做一些根据外部传入 props 的变化，对组件内部状态微调的操作，
+					这里的组件通常是具有自身 state 的智能组件，在一些需要兼容某些业务逻辑的场景还是挺实用的。
+
+				shouldComponentUpdate(object nextProps, object nextState)：
+					组件判断是否重新渲染时调用，比如重新设置某个state等。
+					*** 当函数返回false时候，阻止接下来的render()函数的调用，阻止组件重渲染，而返回true时，组件照常重渲染。
+		*/
+
+		const ChildComponent = React.createClass({
+			componentWillReceiveProps (props) {
+				console.log('当前组件收到了新的props');
+				console.log(this.props);
+				console.log(props);
+			},
+
+			shouldComponentUpdate () {
+				return true;
+			},
+
+			render () {
+				return (
+					<div> {this.props.title} </div>
+				);
+			}
+		});
+
+		const MyComponent = React.createClass({
+			getDefaultProps () {
+				return {
+					title: '这里父组件的title属性'	
+				}
+			},
+
+			getInitialState () {
+				return {
+					num: 1
+				}
+			},
+
+			add (event) {
+				this.setState({
+					num: this.state.num += 1
+				});
+			},
+
+			reduce (event) {
+				this.setState({
+					num: this.state.num -= 1
+				});
+			},
+
+			componentWillMount () {
+				var _this = this;
+				$.ajax({
+					type: 'POST',
+					url: './test.php',
+					data: {
+						a: 1,
+						b: 2
+					},
+					dataType: 'json',
+					success: function (res) {
+						_this.setState({num: res});
+					}
+				});
+			},
+
+			componentDidMount () {
+				console.log(this.state.num);
+			},
+
+			componentWillUpdate () {
+				console.log(this.state.num);
+			},
+
+			componentDidUpdate () {
+				console.log(this.state.num);
+			},
+
+			shouldComponentUpdate (props, state) {
+				console.log('当前组件要重新渲染了！！！');
+				console.log(props);
+				console.log(state);
+				return true; // true则执行reander函数，false则不执行
+			},
+
+			render () {
+				console.log('执行render函数');
+
+				const spanStyle = {
+					padding: '0 10px',
+					fontSize: '16px',
+					color: '#f00',
+					boxShowDown: '2px 2px 2px #ccc'
+				};
+
+				const divStyle = {
+					marginTop: '30px',
+					width: '100px',
+					height: '20px',
+					lineHeight: '20px',
+					textAlign: 'center',
+					backgroundColor: '#f00',
+					color: '#fff',
+					fontSize: '16px',
+					cursor: 'pointer'
+				};
+
+				return (
+					<div>
+						<input type="button" value="-1" onClick={this.reduce} />
+						<span style={spanStyle}>{this.state.num}</span>
+						<input type="button" value="+1" onClick={this.add}  />
+						<ChildComponent title={this.state.num} />
+					</div>
+				);
+			}
+		});
+
+		ReactDOM.render(
+			<MyComponent />,
+			document.querySelector('#app')
+		);
+	</script>
+</body>
+</html>
