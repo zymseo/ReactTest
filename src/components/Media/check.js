@@ -12,7 +12,7 @@ class CheckMedia extends React.Component {
     return (
       <div>
         <div>这里是媒体审核页</div>
-        <NavLink to="/checkMedia/test">查看Test子组件</NavLink>
+        <NavLink to="/checkMedia/test/1/2">查看Test子组件</NavLink>
         <div>
           {this.props.children}
         </div>

@@ -22,7 +22,7 @@ const router = (
           return (
             <CheckMedia>
               <Switch>
-                <Route path="/checkMedia/test" component={Test} />
+                <Route path="/checkMedia/test/:a/:b" component={Test} />
               </Switch>
             </CheckMedia>
           );
